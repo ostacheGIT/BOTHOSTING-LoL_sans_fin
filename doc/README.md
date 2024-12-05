@@ -36,7 +36,31 @@ Voici comment cela fonctionne :
 Commandes | Description 
  --- | --- 
 !d | Démarre le quiz et commence à poser des questions. 
-!s | Arrête le quiz en cours.
-!s | Affiche le score ELO actuel du joueur.
+!a | Arrête le quiz en cours.
+!score | Affiche le score ELO actuel du joueur.
 !lb | Affiche le classement des joueurs.
 !help | Affiche une liste des commandes disponibles.
+
+### Environnement 
+
+#### Flask 
+Pour l'environnement on se sert deF Flask donc on crée l'environnement : 
+```bash
+python -m venv .venv
+```
+Et on lance l'environnement virtuel crée : 
+```bash
+.\.venv\Scripts\Activate
+```
+
+#### Discord.py 
+
+Pour développer l'appli on utilisera `discord.py` : 
+```bash
+pip install discord.py
+```
+
+
+### Hébergement 
+
+Le bot LoL sans fin est hébergé sur `Render` et surveillé et pingué toutes les 5min sur `UptimeRobot`.
