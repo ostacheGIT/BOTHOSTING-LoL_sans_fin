@@ -13,15 +13,19 @@ def load_questions(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 parts = line.strip().split('|')
-                if len(parts) == 6:  
+                if len(parts) == 7:  
                     question = parts[0]
                     answers = parts[1:5]
                     try:
                         correct_answer_index = int(parts[5]) - 1  
+                        difficulty = int(parts[6])
+                        if not (1 <= difficulty <= 5): 
+                            raise ValueError(f"Difficulté invalide: {difficulty}")
                         questions.append({
                             'question': question,
                             'answers': answers,
-                            'correct_answer': answers[correct_answer_index]
+                            'correct_answer': answers[correct_answer_index],
+                            'difficulty': difficulty 
                         })
                         print(f"Question chargée : {question}")  
                     except ValueError as e:

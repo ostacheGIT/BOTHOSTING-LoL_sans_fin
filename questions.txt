@@ -1,2 +1,2 @@
-Combien a de région runeterra? |11|12|13|14|3
-Qui est Govos?|Shen|Zed|Urgot|Singed|1
+Combien a de région runeterra? |11|12|13|14|3|4
+Qui est Govos?|Shen|Zed|Urgot|Singed|1|2

@@ -9,7 +9,7 @@ from events import load_questions
 player_scores = {}
 
 def setup(bot, questions):
-    @bot.command(name='d', help='Démarre le quiz et commence à poser des questions.')
+    @bot.command(name='q', help='Démarre le quiz et commence à poser des questions.')
     async def start_quiz(ctx):
         if ctx.author.id not in player_scores:
             player_scores[ctx.author.id] = 0
@@ -18,28 +18,41 @@ def setup(bot, questions):
             await ctx.send("Aucune question disponible.")
             return
 
-        # Sélectionner une question aléatoire
         question_data = random.choice(questions)
         question = question_data['question']
         answers = question_data['answers']
-        await ctx.send(f"Question: {question}\n1. {answers[0]}\n2. {answers[1]}\n3. {answers[2]}\n4. {answers[3]}")
+        correct_answer = question_data['correct_answer']
+        difficulty = question_data['difficulty']
+        
+        points_rules = {
+        1: {'add': 5, 'subtract': 25},
+        2: {'add': 10, 'subtract': 20},
+        3: {'add': 15, 'subtract': 15},
+        4: {'add': 20, 'subtract': 10},
+        5: {'add': 25, 'subtract': 5}
+        }
+        points_to_add = points_rules[difficulty]['add']
+        points_to_subtract = points_rules[difficulty]['subtract']
 
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit() and 1 <= int(m.content) <= 4
+        view = discord.ui.View()
+        for i, answer in enumerate(answers):
+            button = discord.ui.Button(label=answer, style=discord.ButtonStyle.primary)
+            
+            async def button_callback(interaction, selected_answer=answer):
+                if interaction.user.id == ctx.author.id:
+                    if selected_answer == correct_answer:
+                        player_scores[ctx.author.id] += points_to_add
+                        await interaction.response.send_message(f" ✅ Bonne réponse! Continuez comme ça !  *+{points_to_add}LP*")
+                    else:
+                        player_scores[ctx.author.id] = max(0, player_scores[ctx.author.id] - points_to_subtract)
+                        await interaction.response.send_message(f" ❌ Mauvaise réponse! La bonne réponse était: ||{correct_answer}||  *-{points_to_subtract}LP*")
+                    view.stop()
 
-        try:
-            msg = await bot.wait_for('message', check=check, timeout=30.0)
-        except TimeoutError:
-            await ctx.send(f"Temps écoulé! Fallait répondre plus vite")
-            return
+            button.callback = button_callback
+            view.add_item(button)
 
-        answer = int(msg.content) - 1
-        if question_data['answers'][answer] == question_data['correct_answer']:
-            player_scores[ctx.author.id] += 1
-            await ctx.send(f"Bonne réponse! Votre score est maintenant: {player_scores[ctx.author.id]}")
-        else:
-            player_scores[ctx.author.id] = max(0, player_scores[ctx.author.id] - 1)
-            await ctx.send(f"Mauvaise réponse! La bonne réponse était: ||{question_data['correct_answer']}||")
+        await ctx.send(f"Question: {question}", view=view)
+
 
 
     @bot.command(name='sc', help='Affiche le score actuel.')
