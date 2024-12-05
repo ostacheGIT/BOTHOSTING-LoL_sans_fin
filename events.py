@@ -9,21 +9,29 @@ import random
 # Charger les questions depuis le fichier questions.txt
 def load_questions(file_path):
     questions = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            parts = line.strip().split('|')
-            if len(parts) == 6:
-                question = parts[0]
-                answers = parts[1:5]
-                correct_answer = answers[int(parts[5]) - 1]
-                weight = int(parts[5])
-                questions.append({
-                    'question': question,
-                    'answers': answers,
-                    'correct_answer': correct_answer,
-                    'weight': weight
-                })
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                parts = line.strip().split('|')
+                if len(parts) == 6:  # Vérifie que la ligne contient bien 6 champs
+                    question = parts[0]
+                    answers = parts[1:5]
+                    correct_answer = answers[int(parts[5]) - 1]  # Index de la bonne réponse
+                    weight = int(parts[5])  # Niveau de difficulté (poids)
+                    questions.append({
+                        'question': question,
+                        'answers': answers,
+                        'correct_answer': correct_answer,
+                        'weight': weight
+                    })
+    except FileNotFoundError:
+        print(f"Erreur : Le fichier {file_path} n'existe pas.")
+    except Exception as e:
+        print(f"Erreur lors du chargement des questions : {e}")
+    
+    print(f"{len(questions)} questions chargées.")
     return questions
+
 
 # Scores des joueurs
 player_scores = {}
@@ -35,7 +43,7 @@ def calculate_elo_points(weight, is_correct):
     else:
         return -weight * 5
 
-async def on_message(message, bot, questions):
+async def handle_message(message, bot, questions):
     if message.author.bot:
         return
     if message.content.isdigit() and 1 <= int(message.content) <= 4:

@@ -14,16 +14,15 @@ if TOKEN is None:
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-questions = load_questions('donnees/questions.txt')
+questions = load_questions('questions.txt')
 
 setup(bot, questions)
 
 @bot.event
 async def on_message(message):
-    await on_message(message, bot, questions)
-
+    await handle_message(message, bot, questions)
 
 
 keep_alive()
