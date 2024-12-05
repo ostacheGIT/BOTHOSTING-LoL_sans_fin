@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from keep_alive import keep_alive
 from events import *
-from commandes import *
+from commandes import setup
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -18,12 +18,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 questions = load_questions('questions.txt')
 
+
 setup(bot, questions)
-
-@bot.event
-async def on_message(message):
-    await handle_message(message, bot, questions)
-
 
 keep_alive()
 if __name__ == "__main__":
