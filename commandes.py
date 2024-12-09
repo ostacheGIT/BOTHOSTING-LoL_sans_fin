@@ -24,6 +24,7 @@ def setup(bot, questions):
         question_data = random.choice(questions)
         question = question_data['question']
         answers = question_data['answers']
+        random.shuffle(answers)
         correct_answer = question_data['correct_answer']
         difficulty = question_data['difficulty']
         
@@ -67,13 +68,13 @@ def setup(bot, questions):
 
         await ctx.send(f"Question: {question}", view=view)
 
-    @bot.command(name='sc', help='Affiche le score actuel.')
+    @bot.command(name='s', help='Affiche le score actuel.')
     async def show_score(ctx):
         if ctx.author.id not in player_scores:
             player_scores[ctx.author.id] = 0
         await ctx.send(f"Votre *ELO* actuel cumule : *{player_scores[ctx.author.id]} LP*")
 
-    @bot.command(name='board', help="Affiche le score de tous les joueurs du serveur")
+    @bot.command(name='b', help="Affiche le score de tous les joueurs du serveur")
     async def score_board(ctx):
         if not player_scores: 
             await ctx.send("Aucun score disponible pour le moment.")
@@ -88,4 +89,17 @@ def setup(bot, questions):
             leaderboard += f"**#{rank}** - {username}: {score} LP\n"
 
         await ctx.send(leaderboard)
+
+    @bot.command(name='h', help='Affiche une liste des commandes disponibles.')
+    async def show_help(ctx):
+        help_text = """
+        ```
+        Commandes disponibles:
+        !h - (Help) Affiche cette liste.
+        !q - (Question) Démarre le quiz et commence à poser des questions.
+        !s - (Score) Affiche le score ELO actuel du joueur.
+        !b - (Board) Affiche le classement des joueurs.
+        ```
+        """
+        await ctx.send(help_text)
 
