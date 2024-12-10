@@ -5,6 +5,7 @@ from discord.ext import commands
 from keep_alive import keep_alive
 from events import *
 from commandes import setup
+from db import create_db
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -18,6 +19,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 questions = load_questions('questions.txt')
 
+create_db()
 
 setup(bot, questions)
 

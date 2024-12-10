@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import random
 from events import load_questions
 import asyncio
+from db import get_player_data, update_player_data, get_leaderboard 
 
 player_scores = {}
 player_streaks = {}
@@ -13,10 +14,9 @@ player_streaks = {}
 def setup(bot, questions):
     @bot.command(name='q', help='Démarre le quiz et commence à poser des questions.')
     async def start_quiz(ctx):
-        if ctx.author.id not in player_scores:
-            player_scores[ctx.author.id] = 0
-        if ctx.author.id not in player_streaks:
-            player_streaks[ctx.author.id] = 0
+        player_id = ctx.author.id
+
+        score, streak = get_player_data(player_id)
 
         if not questions:
             await ctx.send("Aucune question disponible.")
@@ -59,29 +59,33 @@ def setup(bot, questions):
                 button = discord.ui.Button(label=answer, style=discord.ButtonStyle.primary)
 
                 async def button_callback(interaction, selected_answer=answer):
+                    nonlocal streak, score
                     if interaction.user.id == ctx.author.id:
                         if selected_answer == correct_answer:
-                            player_streaks[ctx.author.id] += 1
+                            streak += 1
                             bonus_points = 0
 
-                            if player_streaks[ctx.author.id] >= 3:
-                                streak_bonus = min((player_streaks[ctx.author.id] - 2) * 2, 6)
+                            if streak >= 3:
+                                streak_bonus = min((streak - 2) * 2, 6)
                                 bonus_points = streak_bonus
 
-                            player_scores[ctx.author.id] += points_to_add + bonus_points
+                            score += points_to_add + bonus_points
                             feedback = f"✅ Bonne réponse! *+**{points_to_add}**LP 🏆*"
-                            if player_streaks[ctx.author.id] >= 3:
+                            if streak >= 3:
                                 feedback += f" *(+**{bonus_points}**LP bonus de streak 🔥)*"
                             
                             await interaction.response.edit_message(content=feedback)
                             await asyncio.sleep(2)
                         else:
-                            player_streaks[ctx.author.id] = 0
-                            player_scores[ctx.author.id] = max(0, player_scores[ctx.author.id] - points_to_subtract)
+                            streak = 0
+                            score = max(0, score - points_to_subtract)
                             feedback = f"❌ Mauvaise réponse! La bonne réponse était: ||{correct_answer}|| *-**{points_to_subtract}**LP 🏆*"
 
                             await interaction.response.edit_message(content=feedback)
                             await asyncio.sleep(5)
+    
+                        # Mettre à jour les scores et streaks dans la base de données
+                        update_player_data(player_id, score, streak)
 
                         await ask_next_question()
 
@@ -94,25 +98,26 @@ def setup(bot, questions):
 
     @bot.command(name='s', help='Affiche le score actuel.')
     async def show_score(ctx):
-        if ctx.author.id not in player_scores:
-            player_scores[ctx.author.id] = 0
-        await ctx.send(f"Votre *ELO* actuel cumule : *{player_scores[ctx.author.id]} LP*")
+        player_id = ctx.author.id
+        # Récupérer le score du joueur depuis la base de données
+        score, _ = get_player_data(player_id)
+        await ctx.send(f"Votre *ELO* actuel cumule : *{score} LP*")
 
     @bot.command(name='b', help="Affiche le score de tous les joueurs du serveur")
     async def score_board(ctx):
-        if not player_scores: 
+        leaderboard = get_leaderboard()
+
+        if not leaderboard: 
             await ctx.send("Aucun score disponible pour le moment.")
             return
 
-        sorted_scores = sorted(player_scores.items(), key=lambda item: item[1], reverse=True)
-
-        leaderboard = "**Tableau des scores :**\n"
-        for rank, (player_id, score) in enumerate(sorted_scores, start=1):
+        leaderboard_text = "**Tableau des scores :**\n"
+        for rank, (player_id, score) in enumerate(leaderboard, start=1):
             member = await ctx.guild.fetch_member(player_id)
             username = member.display_name if member else f"Utilisateur inconnu ({player_id})"
-            leaderboard += f"**#{rank}** - {username}: {score} LP\n"
+            leaderboard_text += f"**#{rank}** - {username}: {score} LP\n"
 
-        await ctx.send(leaderboard)
+        await ctx.send(leaderboard_text)
 
     @bot.command(name='h', help='Affiche une liste des commandes disponibles.')
     async def show_help(ctx):
