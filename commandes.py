@@ -5,6 +5,7 @@ from keep_alive import keep_alive
 from dotenv import load_dotenv
 import random
 from events import load_questions
+import asyncio
 
 player_scores = {}
 player_streaks = {}
@@ -21,52 +22,75 @@ def setup(bot, questions):
             await ctx.send("Aucune question disponible.")
             return
 
-        question_data = random.choice(questions)
-        question = question_data['question']
-        answers = question_data['answers']
-        random.shuffle(answers)
-        correct_answer = question_data['correct_answer']
-        difficulty = question_data['difficulty']
-        
+        def generate_question():
+            """Génère une nouvelle question aléatoire."""
+            question_data = random.choice(questions)
+            question = question_data['question']
+            answers = question_data['answers']
+            random.shuffle(answers)
+            correct_answer = question_data['correct_answer']
+            difficulty = question_data['difficulty']
+            return question, answers, correct_answer, difficulty
+
+        question, answers, correct_answer, difficulty = generate_question()
+
         points_rules = {
-        1: {'add': 5, 'subtract': 25},
-        2: {'add': 10, 'subtract': 20},
-        3: {'add': 15, 'subtract': 15},
-        4: {'add': 20, 'subtract': 10},
-        5: {'add': 25, 'subtract': 5}
+            1: {'add': 5, 'subtract': 25},
+            2: {'add': 10, 'subtract': 20},
+            3: {'add': 15, 'subtract': 15},
+            4: {'add': 20, 'subtract': 10},
+            5: {'add': 25, 'subtract': 5}
         }
         points_to_add = points_rules[difficulty]['add']
         points_to_subtract = points_rules[difficulty]['subtract']
 
         view = discord.ui.View()
-        for i, answer in enumerate(answers):
-            button = discord.ui.Button(label=answer, style=discord.ButtonStyle.primary)
-            
-            async def button_callback(interaction, selected_answer=answer):
-                if interaction.user.id == ctx.author.id:
-                    if selected_answer == correct_answer:
-                        player_streaks[ctx.author.id] += 1
-                        bonus_points = 0
+        quiz_message = await ctx.send("Initialisation du quiz...")
 
-                        if player_streaks[ctx.author.id] >= 3:
-                            streak_bonus = min((player_streaks[ctx.author.id] - 2) * 2, 6)
-                            bonus_points = streak_bonus
+        async def ask_next_question():
+            """Met à jour le message avec une nouvelle question."""
+            nonlocal question, answers, correct_answer, difficulty
+            question, answers, correct_answer, difficulty = generate_question()
 
-                        player_scores[ctx.author.id] += points_to_add + bonus_points
-                        if player_streaks[ctx.author.id] < 3:
-                            await interaction.response.send_message(f" ✅ Bonne réponse! Continuez comme ça !  *+**{points_to_add}**LP 🏆*")
+            for child in view.children:
+                view.remove_item(child)
+
+            for i, answer in enumerate(answers):
+                button = discord.ui.Button(label=answer, style=discord.ButtonStyle.primary)
+
+                async def button_callback(interaction, selected_answer=answer):
+                    if interaction.user.id == ctx.author.id:
+                        if selected_answer == correct_answer:
+                            player_streaks[ctx.author.id] += 1
+                            bonus_points = 0
+
+                            if player_streaks[ctx.author.id] >= 3:
+                                streak_bonus = min((player_streaks[ctx.author.id] - 2) * 2, 6)
+                                bonus_points = streak_bonus
+
+                            player_scores[ctx.author.id] += points_to_add + bonus_points
+                            feedback = f"✅ Bonne réponse! *+**{points_to_add}**LP 🏆*"
+                            if player_streaks[ctx.author.id] >= 3:
+                                feedback += f" *(+**{bonus_points}**LP bonus de streak 🔥)*"
+                            
+                            await interaction.response.edit_message(content=feedback)
+                            await asyncio.sleep(2)
                         else:
-                            await interaction.response.send_message(f" ✅ Bonne réponse! Continuez comme ça !  *+**{points_to_add}**LP 🏆* *(+**{bonus_points}**LP bonus de streak) 🔥*")
-                    else:
-                        player_streaks[ctx.author.id] = 0
-                        player_scores[ctx.author.id] = max(0, player_scores[ctx.author.id] - points_to_subtract)
-                        await interaction.response.send_message(f" ❌ Mauvaise réponse! La bonne réponse était: ||{correct_answer}||  *-**{points_to_subtract}**LP 🏆*")
-                    view.stop()
+                            player_streaks[ctx.author.id] = 0
+                            player_scores[ctx.author.id] = max(0, player_scores[ctx.author.id] - points_to_subtract)
+                            feedback = f"❌ Mauvaise réponse! La bonne réponse était: ||{correct_answer}|| *-**{points_to_subtract}**LP 🏆*"
 
-            button.callback = button_callback
-            view.add_item(button)
+                            await interaction.response.edit_message(content=feedback)
+                            await asyncio.sleep(5)
 
-        await ctx.send(f"Question: {question}", view=view)
+                        await ask_next_question()
+
+                button.callback = button_callback
+                view.add_item(button)
+
+            await quiz_message.edit(content=f"Question: {question}", view=view)
+
+        await ask_next_question()
 
     @bot.command(name='s', help='Affiche le score actuel.')
     async def show_score(ctx):
