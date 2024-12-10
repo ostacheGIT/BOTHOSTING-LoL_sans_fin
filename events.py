@@ -9,7 +9,6 @@ import random
 def load_questions(file_path):
     questions = []
     try:
-        print(f"Tentative de lecture du fichier : {file_path}")
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 parts = line.strip().split('|')
@@ -26,8 +25,7 @@ def load_questions(file_path):
                             'answers': answers,
                             'correct_answer': answers[correct_answer_index],
                             'difficulty': difficulty 
-                        })
-                        print(f"Question chargée : {question}")  
+                        }) 
                     except ValueError as e:
                         print(f"Erreur de conversion : {e} pour la ligne : {line.strip()}")
                 else:

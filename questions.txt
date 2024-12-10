@@ -1,3 +1,7 @@
+ Combien a de région runeterra?|11|12|13|14|3|3
+
+Qui est Govos?|Shen|Zed|Urgot|Singed|1|2
+
 Qui est le démon dorée ?|Azir|Fiddlestick|Twisted Fate|Jhin|4|2
 
 Qui est Xolaani ?|Une darkin au service de aatrox|Une légende|la darkin la plus puissante|Une déesse|3|2
@@ -32,7 +36,7 @@ Comment est mort Gangplank ?|Un monstre marin a détruit son navire|Illaoi a app
 
 Du à sa puissance, Syndra a du être endormie, par qui ?|Zoé|L'esprit de Ionia|Lillia|Un Calmant puissant |2|4
 
-Quelle est la relation entre Zed et Shen?|Friend to lover|Friend to enemy|Enemy to friend|2|2
+Quelle est la relation entre Zed et Shen?|Friend to lover|Friend to enemy|Enemy to friend|Lover to friend|2|2
 
 Combien est Varus ?|Bah une personne|Un groupe de deux|trois en un|Une secte où tout le monde est varus|3|4
 
@@ -90,7 +94,7 @@ Quels sont les membres de pentakill?|Akali, Kai'sa, Ahri, Evelyn| Ekko, Qiyana, 
 
 Quel Démon Nilah a rencontré pour devenir ce qu'elle est?|Colère|Envie|Joie|orgueil|3|2
 
-Combien de temps sort-on de la fontaine! 10sec|15sec|20sec|25sec|2|4
+Combien de temps sort-on de la fontaine!?| 10sec|15sec|20sec|25sec|2|4
 
 Pourquoi Fiora a tué son père?|Pour sauver son honneur|Pour trahison|Pour prouver qu'elle est superieur à lui|Car elle le deteste|1|4
 
@@ -102,7 +106,7 @@ Ixtal est ?|Une région cachée du Valoran(crari le Wakanda)|La région qui souh
 
 Qu'est-ce que le Valoran?|La zone détruite depuis la guerre runique|Une zone qui regroupe deux équipes de 5 joueurs pour détruire le nexus adverse|Le continent de Runeterra|Un object magique qui donne le pouvoir à quiconque le possedant|3|5
 
-Comment Azir a put revenir à la vie ? Grâce au sang de sa descendance| Grâce à la nécromancie de Yorick| Grâce à l'égide solaire qui lui offre à nouveau la vie|Grâce à Zilean qui est remonté dans le temps|1|3
+Comment Azir a put revenir à la vie ?| Grâce au sang de sa descendance| Grâce à la nécromancie de Yorick| Grâce à l'égide solaire qui lui offre à nouveau la vie|Grâce à Zilean qui est remonté dans le temps|1|3
 
 Comment Kakarina manipule ses armes ?|Elle s'est entrainée depuis son enfance afin d'atteindre un excellent niveau actuel|Elle a fait un rituel avec son sang pour les manipuler|Mage de naissance, elle manipule ses armes avec aisance|Ses armes ont leur propre conscience et ont décidé de rester avec|2|3
 
